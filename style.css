@@ -1,0 +1,43 @@
+* {
+	font-family: "PT Sans", sans-serif;
+}
+
+header {
+	text-align: center;
+	background-color: red;
+}
+
+section {
+	background-color: orange;
+
+	ul {
+		padding-left: 0;
+		list-style-type: none;
+	}
+
+	li {
+		input[type="checkbox"]:before {
+			position: relative;
+			display: block;
+
+			width: 11px;
+			height: 11px;
+			border: 1px solid #808080;
+			content: "";
+			background: #FFF;
+		}
+
+		input[type="checkbox"]:checked:before {
+			background-color: green;
+		}
+	}
+}
+
+footer {
+	text-align: center;
+	background-color: gold;
+
+	h4 {
+		margin-bottom: 0;
+	}
+}
