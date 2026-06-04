@@ -16,19 +16,83 @@ section {
 	}
 
 	li {
-		input[type="checkbox"]:before {
+		display: flex;
+		align-items: center;
+		position: relative;
+		/* Using a custom checkbox type instead of input because I can't find a reasonable way to style an input */
+		.checkbox {
+			width: 1em;
+			aspect-ratio: 1/1;
+			margin: 0 0.25em 0 0.25em;
 			position: relative;
-			display: block;
+			background-color: red;
+			cursor: pointer;
 
-			width: 11px;
-			height: 11px;
-			border: 1px solid #808080;
-			content: "";
-			background: #FFF;
+			&:hover {
+				background-color: green;
+			}
+
+			&[data-state="true"] {
+				background-color: blue;
+				&::after {
+					top: 5%;
+					left: 25%;
+					position: absolute;
+					content: "";
+					width: 30%;
+					aspect-ratio: 1/2;
+					border: solid white;
+					border-width: 0 3px 3px 0;
+					transform: rotate(45deg);
+				}
+
+				&:hover {
+					background-color: green;
+				}
+			}
 		}
+	}
 
-		input[type="checkbox"]:checked:before {
-			background-color: green;
+	#buttonContainer {
+		display: flex;
+		flex-direction: row;
+
+		span + span {
+			margin-left: 1em;
+		}
+		
+		span {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+
+			#addCheckboxButton {
+				width: 1em;
+				aspect-ratio: 1/1;
+				margin: 0 0.25em 0 0.25em;
+				position: relative;
+				background-color: red;
+				cursor: pointer;
+				color: white;
+
+				&::after {
+					content: "+";
+					position: absolute;
+					width: 1em;
+					height: 1em;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				&:hover {
+					background-color: green;
+				}
+
+				&:active {
+					background-color: blue;
+				}
+			}
 		}
 	}
 }
