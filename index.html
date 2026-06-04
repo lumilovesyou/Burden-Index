@@ -28,12 +28,13 @@
 		</header>
 		<section>
 			<p>Tasks to complete:</p>
-			<ul>
+			<ul id="taskList">
 				<li><span class="checkbox" data-state="true"></span> Finish this app</li>
 				<li><span class="checkbox"></span> Make it look nice</li>
+				<!-- Double click/tap to edit is the plan -->
 				<li><span class="checkbox"></span> Publish it!</li>
+				<li><span class="checkbox disabled"></span> <input type="text" id="addCheckboxText"><span id="addCheckbox"></span></li>
 			</ul>
-			<div id="buttonContainer"><span><span id="addCheckboxButton"></span> Add Item</span><span><span id="addCheckboxButton"></span> Add Item</span></div>
 			<script src="./index.js"></script>
 		</section>
 		<footer>

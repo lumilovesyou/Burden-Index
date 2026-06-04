@@ -50,6 +50,52 @@ section {
 					background-color: green;
 				}
 			}
+
+			&.disabled {
+				background-color: grey;
+				cursor: default;
+			}
+		}
+
+		input[type="text"] {
+			background-color: transparent;
+			border: dotted grey;
+			border-width: 0px 0 1px 0;
+
+			&:focus ~ #addCheckbox {
+				outline: none;
+				border-color: white;
+			}
+
+			&:focus ~ #addCheckbox {
+				display: block;
+			}
+		}
+
+		#addCheckbox {
+			width: 1em;
+			aspect-ratio: 1/1;
+			background-color: indigo;
+			position: relative;
+			cursor: pointer;
+			margin-left: 0.5em;
+			display: none;
+
+			&::after {
+				position: absolute;
+				width: 1em;
+				height: 1em;
+				color: white;
+				content: ">";
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			&:active {
+				background-color: blue;
+				display: block;
+			}
 		}
 	}
 
