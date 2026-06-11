@@ -34,6 +34,7 @@ function addListItem() {
 		let taskContainer = document.createElement("li");
 		let taskSpan = document.createElement("span");
 		let taskParagraph = document.createElement("p");
+		let taskHandle = document.createElement("span");
 
 		//Assembles task container
 		taskContainer.classList.add("item");
@@ -49,9 +50,17 @@ function addListItem() {
 		taskParagraph.addEventListener("dblclick", (e) => { swapTextState(e.target); });
 		taskContainer.appendChild(taskParagraph)
 
+		//Assembles the handle
+		taskHandle.innerText = "܍"; //Will replace this symbol with an svg or something later ~~~~~~
+		taskHandle.classList.add("handle");
+		taskContainer.appendChild(taskHandle)
+
+		//Final steps
+		applyDragEvents(taskContainer);
+
 		//Clear value and insert to list
 		addCheckboxText.value = "";
-		taskList.insertBefore(taskContainer, taskList.childNodes[taskList.childNodes.length - 2]);
+		taskList.insertBefore(taskContainer, taskList.childNodes[taskList.childNodes.length - 1]);
 	}
 }
 
@@ -96,8 +105,12 @@ function swapTextState(element) {
 let dragged = null;
 
 let draggableItems = taskList.childNodes.forEach(task => {
-	task.draggable = true;
-	task.addEventListener("dragover", (e) => {
+	applyDragEvents(task) //I'll be removing this loop once I add items in from stored data rather than modifying the default items
+});
+
+function applyDragEvents(item) {
+	item.draggable = true;
+	item.addEventListener("dragover", (e) => {
 		e.preventDefault;
 
 		const target = e.target.closest(".item");
@@ -115,16 +128,17 @@ let draggableItems = taskList.childNodes.forEach(task => {
 		}
 	});
 
-	task.addEventListener("dragstart", (e) => {
-		dragged = e.target;
+	item.addEventListener("dragstart", (e) => {
+		if (!document.elementFromPoint(e.clientX, e.clientY).classList.contains("handle")) { e.preventDefault(); return; }
+		dragged = e.target.closest(".item");
 		setTimeout(() => dragged.classList.add("dragging"), 0);
 	});
 
 
-	task.addEventListener("dragend", (e) => {
+	item.addEventListener("dragend", (e) => {
 		dragged.classList.remove("dragging");
 		taskList.querySelectorAll(".item").forEach(i => i.classList.remove("over"));
 		dragged = null;
 	});
-});
+}
 ////

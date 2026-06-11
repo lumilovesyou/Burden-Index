@@ -13,27 +13,32 @@ section {
 	ul {
 		padding-left: 0;
 		list-style-type: none;
+		margin-bottom: 0;
 	}
 
 	li {
 		display: flex;
 		align-items: center;
 		position: relative;
-		cursor: move;
-		cursor: grab;
-		cursor: -moz-grab;
-		cursor: -webkit-grab;
 		touch-action: none; /* We'll need to shrink list objects to keep a minimum scrollable area*/
 		background-color: green;
 
+		/* Unsure why this isn't applying the grabbing mouse.... ~~~~~~~ */
 		&.dragging {
+			background-color: white;
 			cursor: grabbing;
 			cursor: -moz-grabbing;
 			cursor: -webkit-grabbing;
+			opacity: 20%;
+		}
+
+		&.active {
+			background-color: yellow;
 		}
 
 		p {
 			margin: 0;
+			cursor: text;
 		}
 
 		/* Using a custom checkbox type instead of input because I can't find a reasonable way to style an input */
@@ -113,6 +118,26 @@ section {
 			&:active {
 				background-color: blue;
 				display: block;
+			}
+		}
+
+		span.handle {
+			color: white;
+			cursor: move;
+			cursor: grab;
+			cursor: -moz-grab;
+			cursor: -webkit-grab;
+			margin-left: auto;
+			margin-right: 0.5em;
+
+			&:hover {
+				opacity: 75%;
+			}
+
+			&:active {
+				cursor: grabbing;
+				cursor: -moz-grabbing;
+				cursor: -webkit-grabbing;
 			}
 		}
 	}
