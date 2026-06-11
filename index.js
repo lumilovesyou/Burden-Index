@@ -8,7 +8,7 @@ function save() {
 		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true" });
 	});
 	localStorage.setItem("savedListItems", JSON.stringify(toSave));
-	console.log(localStorage.getItem("savedListItems")); //remove me! ~~~~~~
+	//console.log(localStorage.getItem("savedListItems")); //remove me! ~~~~~~
 }
 
 function load() {
@@ -88,6 +88,8 @@ function addListItem(text, checked = false) {
 
 //Swaps the state for editing a list item
 function swapTextState(element) {
+    if (element.dataset.processing) return; //Stop the error from enter causing double event fire
+    element.dataset.processing = "true";
 	if (element.nodeName == "P") {
 		//Creates the parts of the checklist item which are modified
 		let editText = document.createElement("input");
@@ -97,13 +99,13 @@ function swapTextState(element) {
 		editText.type = "text";
 		editText.value = element.innerText;
 		editText.addEventListener("keypress", (e) => { if (e.key == "Enter") { swapTextState(e.target); }});//Need to add enter button for mobile support
-		editText.addEventListener("focusout", (e) => { swapTextState(e.target); }); //Should I make defocusing reset text or no? ~~~~~~
 		element.replaceWith(editText);
 
 		//Assembles enter button
 		editButton.id = "addCheckbox";
-		editButton.addEventListener("click", (e) => { swapTextState(e.target.parentNode.childNodes[-2]); });
-		editText.parentNode.appendChild(editButton);
+		editButton.addEventListener("click", (e) => { swapTextState(e.target.parentNode.querySelector("input[type='text']")); });
+		editText.addEventListener("focusout", (e) => { swapTextState(e.target); }); //Should I make defocusing reset text or no? ~~~~~~
+		editText.parentNode.insertBefore(editButton, editText.parentNode.lastChild);
 
 		//Focus the user
 		editText.focus();
@@ -119,10 +121,11 @@ function swapTextState(element) {
 		element.replaceWith(text);
 
 		//Remove the enter button
-		parent.removeChild(parent.lastChild);
+		parent.removeChild(parent.querySelector("#addCheckbox"));
 
 		save(); //Save list automatically
 	}
+    element.dataset.processing = "false";
 }
 ////
 
