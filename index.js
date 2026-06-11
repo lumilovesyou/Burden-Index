@@ -1,3 +1,24 @@
+//Code consts
+const taskList = document.getElementById("taskList");
+
+////Save and load code
+function save() {
+	let toSave = [];
+	document.querySelectorAll("li.item").forEach(li => {
+		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true" });
+	});
+	localStorage.setItem("savedListItems", JSON.stringify(toSave));
+	console.log(localStorage.getItem("savedListItems")); //remove me! ~~~~~~
+}
+
+function load() {
+	taskList.innerHTML = "";
+	JSON.parse(localStorage.getItem("savedListItems")).forEach(li => {
+		addListItem(li.text, li.checked);
+	});
+}
+////
+
 //This will be removed one list items are loaded since they'll all be created with the event listener
 let checkboxes = document.getElementsByClassName("checkbox");
 for (let i = 0; i < checkboxes.length; i++) {
@@ -10,26 +31,26 @@ for (let i = 0; i < checkboxes.length; i++) {
 ////Set up checkboxes
 const addCheckboxButton = document.getElementById("addCheckbox");
 const addCheckboxText = document.getElementById("addCheckboxText");
-const taskList = document.getElementById("taskList");
 
 addCheckboxText.addEventListener("keypress", (e) => {
 	if (e.key == "Enter") {
-		addListItem();
+		addListItem(addCheckboxText.value);
 	}
 });
 
 addCheckboxButton.addEventListener("click", () => {
-	addListItem();
+	addListItem(addCheckboxText.value);
 });
 
 function swapCheckboxState(obj) {
 	if (!obj.classList.contains("disabled")) {
 		obj.dataset.state = obj.dataset.state == "true" ? false : true;
+		save(); //Save list automatically
 	};
 }
 
-function addListItem() {
-	if (addCheckboxText.value.length > 0) {
+function addListItem(text, checked = false) {
+	if (text.length > 0) {
 		//Creates the parts of the checklist item
 		let taskContainer = document.createElement("li");
 		let taskSpan = document.createElement("span");
@@ -41,12 +62,12 @@ function addListItem() {
 
 		//Assembles the checkbox
 		taskSpan.classList.add("checkbox");
-		taskSpan.draggable = true;
+		taskSpan.dataset.state = String(checked);
 		taskSpan.addEventListener("click", (e) => { swapCheckboxState(e.target); });
 		taskContainer.appendChild(taskSpan);
 
 		//Assembles the text
-		taskParagraph.innerText = addCheckboxText.value;
+		taskParagraph.innerText = text;
 		taskParagraph.addEventListener("dblclick", (e) => { swapTextState(e.target); });
 		taskContainer.appendChild(taskParagraph)
 
@@ -56,14 +77,16 @@ function addListItem() {
 		taskContainer.appendChild(taskHandle)
 
 		//Final steps
+		taskSpan.draggable = true;
 		applyDragEvents(taskContainer);
 
 		//Clear value and insert to list
 		addCheckboxText.value = "";
-		taskList.insertBefore(taskContainer, taskList.childNodes[taskList.childNodes.length - 1]);
+		taskList.appendChild(taskContainer);
 	}
 }
 
+//Swaps the state for editing a list item
 function swapTextState(element) {
 	if (element.nodeName == "P") {
 		//Creates the parts of the checklist item which are modified
@@ -97,6 +120,8 @@ function swapTextState(element) {
 
 		//Remove the enter button
 		parent.removeChild(parent.lastChild);
+
+		save(); //Save list automatically
 	}
 }
 ////
@@ -139,6 +164,12 @@ function applyDragEvents(item) {
 		dragged.classList.remove("dragging");
 		taskList.querySelectorAll(".item").forEach(i => i.classList.remove("over"));
 		dragged = null;
+		save(); //Save list automatically
 	});
 }
 ////
+
+
+
+////Code to run at page load
+load();
