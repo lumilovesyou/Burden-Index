@@ -19,7 +19,25 @@ section {
 		display: flex;
 		align-items: center;
 		position: relative;
+		cursor: move;
+		cursor: grab;
+		cursor: -moz-grab;
+		cursor: -webkit-grab;
+		touch-action: none; /* We'll need to shrink list objects to keep a minimum scrollable area*/
+		background-color: green;
+
+		&.dragging {
+			cursor: grabbing;
+			cursor: -moz-grabbing;
+			cursor: -webkit-grabbing;
+		}
+
+		p {
+			margin: 0;
+		}
+
 		/* Using a custom checkbox type instead of input because I can't find a reasonable way to style an input */
+		/* Need to fix wrapping text lines shrinking the checkbox ~~~~~~~ */
 		.checkbox {
 			width: 1em;
 			aspect-ratio: 1/1;
@@ -62,7 +80,7 @@ section {
 			border: dotted grey;
 			border-width: 0px 0 1px 0;
 
-			&:focus ~ #addCheckbox {
+			&:focus {
 				outline: none;
 				border-color: white;
 			}
