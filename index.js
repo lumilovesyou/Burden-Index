@@ -1,9 +1,9 @@
 //This will be removed one list items are loaded since they'll all be created with the event listener
 let checkboxes = document.getElementsByClassName("checkbox");
 for (let i = 0; i < checkboxes.length; i++) {
-	checkboxes[i].addEventListener("click", () => {
+	checkboxes[i].addEventListener("click", (e) => {
 		//This is like really ugly but just putting !Boolean() around it doesn't work...
-		swapCheckboxState(checkboxes[i]);
+		swapCheckboxState(e.target);
 	});
 };
 
