@@ -121,6 +121,15 @@ section {
 			}
 		}
 
+		span.trash {
+			margin-left: auto;
+			cursor: pointer;
+
+			&:hover {
+				filter: brightness(150%);
+			}
+		}
+
 		span.handle {
 			color: white;
 			cursor: move;
@@ -139,6 +148,10 @@ section {
 				cursor: -moz-grabbing;
 				cursor: -webkit-grabbing;
 			}
+		}
+
+		.trash + .handle {
+			margin: 0 0.5em;
 		}
 	}
 

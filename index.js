@@ -87,13 +87,23 @@ function addListItem(text, checked = false) {
 }
 
 //Swaps the state for editing a list item
-function swapTextState(element) {
+async function avoidFocusOutClick(e) {
+	e.preventDefault();
+	return new Promise(resolve => {
+		document.addEventListener("mouseup", (f) => {
+			resolve(document.elementFromPoint(f.clientX, f.clientY) == e.target);
+		}, { once: true })
+	});
+}
+
+async function swapTextState(element) {
     if (element.dataset.processing) return; //Stop the error from enter causing double event fire
     element.dataset.processing = "true";
 	if (element.nodeName == "P") {
 		//Creates the parts of the checklist item which are modified
 		let editText = document.createElement("input");
 		let editButton = document.createElement("span");
+		let taskTrash = document.createElement("span");
 
 		//Assembles the text input
 		editText.type = "text";
@@ -101,11 +111,19 @@ function swapTextState(element) {
 		editText.addEventListener("keypress", (e) => { if (e.key == "Enter") { swapTextState(e.target); }});//Need to add enter button for mobile support
 		element.replaceWith(editText);
 
+		const parent = editText.parentNode;
+
 		//Assembles enter button
 		editButton.id = "addCheckbox";
-		editButton.addEventListener("click", (e) => { swapTextState(e.target.parentNode.querySelector("input[type='text']")); });
+		editButton.addEventListener("mousedown", async (e) => { if (await avoidFocusOutClick(e)) { swapTextState(e.target.parentNode.querySelector("input[type='text']")); }});
 		editText.addEventListener("focusout", (e) => { swapTextState(e.target); }); //Should I make defocusing reset text or no? ~~~~~~
-		editText.parentNode.insertBefore(editButton, editText.parentNode.lastChild);
+		parent.insertBefore(editButton, parent.lastChild);
+
+		//Assembles the trash
+		taskTrash.innerText = "🗑️";
+		taskTrash.classList.add("trash");
+		taskTrash.addEventListener("mousedown", async (e) => { if (await avoidFocusOutClick(e)) { parent.remove(); save(); }});//parent.remove(); 
+		parent.insertBefore(taskTrash, parent.lastChild);
 
 		//Focus the user
 		editText.focus();
@@ -122,6 +140,7 @@ function swapTextState(element) {
 
 		//Remove the enter button
 		parent.removeChild(parent.querySelector("#addCheckbox"));
+		parent.removeChild(parent.querySelector(".trash"));
 
 		save(); //Save list automatically
 	}
