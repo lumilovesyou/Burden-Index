@@ -96,7 +96,7 @@ async function avoidFocusOutClick(e) {
 	});
 }
 
-async function swapTextState(element) {
+async function swapTextState(element, oldText = "") {
     if (element.dataset.processing) return; //Stop the error from enter causing double event fire
     element.dataset.processing = "true";
 	if (element.nodeName == "P") {
@@ -108,7 +108,8 @@ async function swapTextState(element) {
 		//Assembles the text input
 		editText.type = "text";
 		editText.value = element.innerText;
-		editText.addEventListener("keypress", (e) => { if (e.key == "Enter") { swapTextState(e.target); }});//Need to add enter button for mobile support
+		editText.dataset.old = element.innerText;
+		editText.addEventListener("keydown", (e) => { if (e.key === "Enter") { swapTextState(e.target); } else if (e.key === "Escape") { swapTextState(e.target, e.target.dataset.old) }});//Need to add enter button for mobile support
 		element.replaceWith(editText);
 
 		const parent = editText.parentNode;
@@ -116,7 +117,7 @@ async function swapTextState(element) {
 		//Assembles enter button
 		editButton.id = "addCheckbox";
 		editButton.addEventListener("mousedown", async (e) => { if (await avoidFocusOutClick(e)) { swapTextState(e.target.parentNode.querySelector("input[type='text']")); }});
-		editText.addEventListener("focusout", (e) => { swapTextState(e.target); }); //Should I make defocusing reset text or no? ~~~~~~
+		editText.addEventListener("focusout", (e) => { swapTextState(e.target, e.target.dataset.old); }); //Should I make defocusing reset text or no? ~~~~~~
 		parent.insertBefore(editButton, parent.lastChild);
 
 		//Assembles the trash
@@ -134,7 +135,7 @@ async function swapTextState(element) {
 		let text = document.createElement("p");
 
 		//Assembles the paragraph
-		text.innerText = element.value;
+		text.innerText = oldText ? oldText : element.value;
 		text.addEventListener("dblclick", (e) => { swapTextState(e.target); });
 		element.replaceWith(text);
 
