@@ -1,32 +1,40 @@
 //Code consts
 const taskList = document.getElementById("taskList");
+const emptyItem = document.getElementById("addCheckboxText");
+
+function isNavigationKey(key) {
+	return ((/(F)[1-9]/g).test(key) || (/(Arrow)[A-z]*/g).test(key) || ["Tab", " ", "Shift", "Enter", "Meta", "Alt", "Control", "CapsLock", "Escape"].includes(key));
+}
+
+function updateTaskTabIndex() {
+	let i = 0;
+	for (i = 0; i < taskList.children.length; i += 1) {
+		const task = taskList.children[i];
+		task.querySelector(".checkbox").tabIndex = i * 2;
+		const p = task.querySelector("p");
+		if (p) { p.tabIndex = i * 2 + 1; }
+	}
+	document.getElementById("addCheckboxText").tabIndex = i = i * 2;
+	document.getElementById("source").tabIndex = ++i;
+	document.getElementById("license").tabIndex = ++i;
+}
 
 ////Save and load code
 function save() {
 	let toSave = [];
 	document.querySelectorAll("li.item").forEach(li => {
-		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true" });
+		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true", sub: li.classList.contains("sub") });
 	});
 	localStorage.setItem("savedListItems", JSON.stringify(toSave));
-	//console.log(localStorage.getItem("savedListItems")); //remove me! ~~~~~~
 }
 
 function load() {
 	taskList.innerHTML = "";
 	JSON.parse(localStorage.getItem("savedListItems")).forEach(li => {
-		addListItem(li.text, li.checked);
+		addListItem(li.text, li.checked, li.sub);
 	});
 }
 ////
-
-//This will be removed one list items are loaded since they'll all be created with the event listener
-let checkboxes = document.getElementsByClassName("checkbox");
-for (let i = 0; i < checkboxes.length; i++) {
-	checkboxes[i].addEventListener("click", (e) => {
-		//This is like really ugly but just putting !Boolean() around it doesn't work...
-		swapCheckboxState(e.target);
-	});
-};
 
 ////Set up checkboxes
 const addCheckboxButton = document.getElementById("addCheckbox");
@@ -42,14 +50,19 @@ addCheckboxButton.addEventListener("click", () => {
 	addListItem(addCheckboxText.value);
 });
 
+function addTaskTabEvents(object) {
+	object.addEventListener("keydown", (e) => { if (document.activeElement === e.target && e.key === "Enter" || e.key === " ") { e.preventDefault(); e.target.click(); e.target.dispatchEvent(new MouseEvent("dblclick")); } });
+	return object;
+}
+
 function swapCheckboxState(obj) {
 	if (!obj.classList.contains("disabled")) {
 		obj.dataset.state = obj.dataset.state == "true" ? false : true;
 		save(); //Save list automatically
-	};
+	}
 }
 
-function addListItem(text, checked = false) {
+function addListItem(text, checked = false, sub = false) {
 	if (text.length > 0) {
 		//Creates the parts of the checklist item
 		let taskContainer = document.createElement("li");
@@ -59,20 +72,25 @@ function addListItem(text, checked = false) {
 
 		//Assembles task container
 		taskContainer.classList.add("item");
+		if (sub) { taskContainer.classList.add("sub"); }
 
 		//Assembles the checkbox
 		taskSpan.classList.add("checkbox");
+		taskSpan.tabIndex = (taskList.length * 2) - 1;
 		taskSpan.dataset.state = String(checked);
 		taskSpan.addEventListener("click", (e) => { swapCheckboxState(e.target); });
+		taskSpan = addTaskTabEvents(taskSpan);
+
 		taskContainer.appendChild(taskSpan);
 
 		//Assembles the text
 		taskParagraph.innerText = text;
 		taskParagraph.addEventListener("dblclick", (e) => { swapTextState(e.target); });
+		taskParagraph = addTaskTabEvents(taskParagraph);
 		taskContainer.appendChild(taskParagraph)
 
 		//Assembles the handle
-		taskHandle.innerText = "܍"; //Will replace this symbol with an svg or something later ~~~~~~
+		taskHandle.innerText = "⇅"; //Will replace this symbol with an svg or something later ~~~~~~
 		taskHandle.classList.add("handle");
 		taskContainer.appendChild(taskHandle)
 
@@ -137,6 +155,7 @@ async function swapTextState(element, oldText = "") {
 		//Assembles the paragraph
 		text.innerText = oldText ? oldText : element.value;
 		text.addEventListener("dblclick", (e) => { swapTextState(e.target); });
+		text = addTaskTabEvents(text);
 		element.replaceWith(text);
 
 		//Remove the enter button
@@ -146,6 +165,7 @@ async function swapTextState(element, oldText = "") {
 		save(); //Save list automatically
 	}
     element.dataset.processing = "false";
+	updateTaskTabIndex();
 }
 ////
 
@@ -159,7 +179,7 @@ let draggableItems = taskList.childNodes.forEach(task => {
 function applyDragEvents(item) {
 	item.draggable = true;
 	item.addEventListener("dragover", (e) => {
-		e.preventDefault;
+		e.preventDefault();
 
 		const target = e.target.closest(".item");
 		if (!target || target === dragged) return;
@@ -171,8 +191,19 @@ function applyDragEvents(item) {
 		const middle = rect.top + rect.height / 2;
 		if (e.clientY < middle) {
 			taskList.insertBefore(dragged, target);
+			dragged.classList.remove("sub");
 		} else {
-			taskList.insertBefore(dragged, target.nextSibling);
+			taskList.insertBefore(dragged, target.nextElementSibling);
+			if ((e.clientX - rect.left) > rect.width * 0.7) {
+				dragged.classList.remove("sub");
+			} else {
+				dragged.classList.add("sub");
+				//next element sibling is equal to dragged, must fix!!!! ~~~~~~~
+				if (dragged !== target.nextElementSibling && target.nextElementSibling instanceof Element) {
+					dragged.style.setProperty("--padding-left", parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
+					console.log(parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
+				}
+			}
 		}
 	});
 
@@ -185,7 +216,15 @@ function applyDragEvents(item) {
 
 	item.addEventListener("dragend", (e) => {
 		dragged.classList.remove("dragging");
-		taskList.querySelectorAll(".item").forEach(i => i.classList.remove("over"));
+		taskList.querySelectorAll(".item").forEach(i => i.classList.remove("dragover"));
+
+		//Check if cursor in task list
+		const rect = taskList.getBoundingClientRect();
+		if (!(e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom)) {
+			//Throw out item if not
+			dragged.remove();
+		}
+
 		dragged = null;
 		save(); //Save list automatically
 	});
@@ -196,3 +235,14 @@ function applyDragEvents(item) {
 
 ////Code to run at page load
 load();
+
+document.addEventListener("keydown", (e) => {
+	const active = document.activeElement;
+	if (document.activeElement === document.body && !isNavigationKey(e.key)) {
+		emptyItem.focus()
+	}
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+	updateTaskTabIndex();
+});
