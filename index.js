@@ -199,7 +199,6 @@ function applyDragEvents(item) {
 				dragged.classList.remove("sub");
 			} else {
 				dragged.classList.add("sub");
-				//next element sibling is equal to dragged, must fix!!!! ~~~~~~~
 				if (dragged !== target.nextElementSibling && target.nextElementSibling instanceof Element) {
 					dragged.style.setProperty("--padding-left", parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
 					console.log(parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
