@@ -23,7 +23,7 @@ function updateTaskTabIndex() {
 function save() {
 	let toSave = [];
 	document.querySelectorAll("li.item").forEach(li => {
-		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true", sub: li.classList.contains("sub") });
+		toSave.push({ text: li.querySelector("p").innerText, checked: li.querySelector(".checkbox").dataset.state == "true", sub: li.classList.contains("sub"), padding: window.getComputedStyle(li).getPropertyValue("--padding-left") });
 	});
 	localStorage.setItem("savedListItems", JSON.stringify(toSave));
 }
@@ -31,7 +31,7 @@ function save() {
 function load() {
 	taskList.innerHTML = "";
 	JSON.parse(localStorage.getItem("savedListItems")).forEach(li => {
-		addListItem(li.text, li.checked, li.sub);
+		addListItem(li.text, li.checked, li.sub, li.padding);
 	});
 }
 ////
@@ -62,7 +62,7 @@ function swapCheckboxState(obj) {
 	}
 }
 
-function addListItem(text, checked = false, sub = false) {
+function addListItem(text, checked = false, sub = false, padding = 0) {
 	if (text.length > 0) {
 		//Creates the parts of the checklist item
 		let taskContainer = document.createElement("li");
@@ -73,6 +73,7 @@ function addListItem(text, checked = false, sub = false) {
 		//Assembles task container
 		taskContainer.classList.add("item");
 		if (sub) { taskContainer.classList.add("sub"); }
+		if (padding > 0) { taskContainer.style.setProperty("--padding-left", padding)}
 
 		//Assembles the checkbox
 		taskSpan.classList.add("checkbox");
@@ -202,6 +203,15 @@ function applyDragEvents(item) {
 				if (dragged !== target.nextElementSibling && target.nextElementSibling instanceof Element) {
 					dragged.style.setProperty("--padding-left", parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
 					console.log(parseInt(getComputedStyle(target.nextElementSibling).getPropertyValue("--padding-left")) + 1);
+				} else {
+					taskList.insertBefore(dragged, target.nextElementSibling);
+					if ((e.clientX - rect.left) > rect.width * 0.7) {
+						dragged.classList.remove("sub");
+					} else {
+						dragged.classList.add("sub");
+						const targetPadding = parseInt(getComputedStyle(target).getPropertyValue("--padding-left")) || 0;
+						dragged.style.setProperty("--padding-left", targetPadding + 1);
+					}
 				}
 			}
 		}
